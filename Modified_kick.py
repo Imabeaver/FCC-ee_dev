@@ -1,4 +1,4 @@
-# beam-beam kick for leptons in FCC-ee (RUN with python NOT python3!)
+# beam-beam kick for electrons in FCC-ee (RUN with python NOT python3!)
 
 import numpy as np
 from numpy import sqrt, pi, exp,sign
@@ -9,7 +9,7 @@ from scipy.integrate import quad, dblquad
 import matplotlib.pyplot as plt
 from errffor import errf
 
-# see if you can use scipy.special.erfcx instead of errf
+# see if scipy.special.erfcx can be used instead of errf
 def wfun(z):
     x=z.real
     y=z.imag
@@ -17,7 +17,7 @@ def wfun(z):
 
     return wx+1j*wy
 
-# calculate the electric field along x and y
+# calculates the electric field along x and y
 def BassErsk(Csigx,Csigy,sepx,sepy):
 
 		# Separations are moved from mm to meters
@@ -29,7 +29,7 @@ def BassErsk(Csigx,Csigy,sepx,sepy):
     sigmay = sqrt((Csigy*(10**-6))**2)
 
 
-		#I change the constant factor in front of the fields to have it in units of rp and gamma (K=2.*rp/gamma)
+		#Change the constant factor in front of the fields to have it in units of rp and gamma (K=2.*rp/gamma)
     eps0= 1.  
 
     S=sqrt(2*(sigmax*sigmax-sigmay*sigmay));
@@ -75,7 +75,7 @@ def BB(Csigx,Csigy,sepx,sepy,betax,betay,tunex,tuney,Np):
 
 
 
-# test (WORKS)
+# constants for FCC-ee
 Csigx = 6.4 # in micro meters
 Csigy = 28 * 1e-3
 
@@ -125,7 +125,4 @@ plt.plot(x, y4, color='b', label = 'Orbit_y')
 plt.xlabel('sep units Capsigma')
 plt.ylabel(r'BB Orbit deflection [$\mu$ m]');
 plt.legend()
-#plt.show()
-
-
-
+plt.show()
