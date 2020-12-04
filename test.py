@@ -98,22 +98,3 @@ def kick_calc(x,y):
 		return Dfleix, Dfleiy
 
 
-#x, y1, y2, y3, y4 = kick_calc()
-
-#plt.figure(dpi = 100)
-#plt.plot(x, y1, color='r', label = 'Kick_x')
-#plt.plot(x, y2, color='b', label = 'Kick_y')
-#plt.xlabel('sep units Capsigma')
-#plt.ylabel(r'BB Deflection angle [$\mu$ rad]')
-#plt.legend()
-
-#plt.figure(dpi = 100)
-#plt.plot(x, y3, color='r', label = 'Orbit_x')
-#plt.plot(x, y4, color='b', label = 'Orbit_y')
-#plt.xlabel('sep units Capsigma')
-#plt.ylabel(r'BB Orbit deflection [$\mu$ m]');
-#plt.legend()
-#plt.show()
-
-
-
