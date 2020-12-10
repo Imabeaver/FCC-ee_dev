@@ -75,7 +75,8 @@ def BB(Csigx,Csigy,sepx,sepy,betax,betay,tunex,tuney,Ne):
     return Dfleix*10**6,Dfleiy*10**6,Orbx*10**6,Orby*10**6
 
 def kick_calc(x,y):
-
+		# x, y must be a single value! If given as array the code doesn't perform as it should.
+		
 		# constants
 		sigx = 6.4 # micro m
 		sigy = 28 * 1e-3 # micro m
