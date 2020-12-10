@@ -25,7 +25,7 @@ for i = 1:n_turns
     dy = a{2};
     dy = double(dy);
     
-    amp = [0 dx*1.0e-6 0 0 0 0]';
+    amp = [0 dx*1.0e-6 0 dy*1.0e-6 0 0]';
     bb.Amplitude = amp; 
     ring_new = [ring; {bb}];
     
