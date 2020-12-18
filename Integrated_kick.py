@@ -7,15 +7,16 @@ import sys
 from scipy.interpolate import interp1d
 from scipy.integrate import quad, dblquad
 import matplotlib.pyplot as plt
-from errffor import errf
+#from errffor import errf
+from scipy.special import wofz
 
 # see if you can use scipy.special.erfcx instead of errf
 def wfun(z):
-    x=z.real
-    y=z.imag
-    wx,wy=errf(x,y)
-
-    return wx+1j*wy
+    #x=z.real
+    #y=z.imag
+    #wx,wy=errf(x,y)
+    #return wx+1j*wy
+    return wofz(z)
 
 # calculate the electric field along x and y
 def BassErsk(Csigx,Csigy,sepx,sepy):
