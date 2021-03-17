@@ -14,12 +14,12 @@ quads = findcells(ring_rad,'Class','Quadrupole');
 sexts = findcells(ring_rad,'Class','Sextupole');
 
 k0 = atgetfieldvalues(ring_rad(bends),'BendingAngle')./atgetfieldvalues(ring_rad(bends),'Length');
-k1 = atgetfieldvalues(ring_rad(quads),'PolynomB',{2});
-k2 = atgetfieldvalues(ring_rad(sexts),'PolynomB',{3});
+%k1 = atgetfieldvalues(ring_rad(quads),'PolynomB',{2});
+%k2 = atgetfieldvalues(ring_rad(sexts),'PolynomB',{3});
 
 ring_rad(bends) = atsetfieldvalues(ring_rad(bends),'PolynomB',{1},k0.*cop_i(bends)');
-ring_rad(quads) = atsetfieldvalues(ring_rad(quads),'PolynomB',{2},k1.*(1+cop_i(quads)'));
-ring_rad(sexts) = atsetfieldvalues(ring_rad(sexts),'PolynomB',{3},k2.*(1+cop_i(sexts)'));
+%ring_rad(quads) = atsetfieldvalues(ring_rad(quads),'PolynomB',{2},k1.*(1+cop_i(quads)'));
+%ring_rad(sexts) = atsetfieldvalues(ring_rad(sexts),'PolynomB',{3},k2.*(1+cop_i(sexts)'));
 
 %Get 6D orbit no bb / w. radiations
 co_t = findorbit6(ring_rad,1:length(ring_rad)+1);
