@@ -7,8 +7,13 @@ import matplotlib.pyplot as plt
 import at.plot.specific
 
 def b2_kick(rin, E0, sigx, sigy, betax, betay, tunex, tuney, Ne):
+    #this part should be adapted to accept numpy arrays, see comments in bb_integrated.py
     kick = kick_calc(rin[0],rin[2],E0, sigx, sigy, betax, betay, tunex, tuney, Ne)
+    #python uses pointers, this just creates a pointer to rin, in case you want to keep
+    #rin you have to save a copy explicitely but it is not needed
     rout = rin
+    # again confusing unit conversion, AT uses SI units
+    # you could use: rin[1] += kick[0] and return rin
     rout[1] = rin[1] + kick[0]*1.0e-6
     rout[3] = rin[3] + kick[1]*1.0e-6
     return rout
@@ -16,12 +21,18 @@ def b2_kick(rin, E0, sigx, sigy, betax, betay, tunex, tuney, Ne):
 # load lattices
 rin = np.array([1.0e-6,0,0,0,0,0])
 
+# See my email on optics with radiations and attached example, in principle
+# need to load the optics without raidation only, the others can now be generated
+# with function: this will be faster
 ring_norad = at.load_mat('./Lattices/fcch_norad.mat', mat_key='ring')
 ring_rad = at.load_mat('./Lattices/fcch_rad.mat', mat_key='ring')
 ring_tapered = at.load_mat('./Lattices/fcch_rad_tapered.mat', mat_key='ring')
 ring_tapered.radiation_on()
 
 # tune, chromaticity and energy
+# Again you can use the new linopt_rad function to get all the paramters you need
+# optics,tune,chrom,_= linopt_rad(ring_tapered) will return optics, tune, chrom
+#at the start of the lattice
 t = ring_norad.get_tune()
 q = ring_norad.get_chrom()
 E0 = ring_norad.energy
@@ -46,6 +57,10 @@ elif (E0 == 80*1e9) is True:
 print('Emittance_x:',epsilon_x,'\n','Emittance_y', epsilon_y)
 
 # optics
+# Ah you have it -> replace by linopt_rad(ring_tapered), why do you recompute tune and chrom?
+# maybe a single call to this function gives you everything you need
+# if your lattice starts at an IP, which I think it is, you do not need to specify refpts,
+#and use lindata0 instead
 IP_indexes = get_refpts(ring_norad, 'IP*')
 lindata0, tune, chrom, lindata = ring_norad.linopt(get_chrom=True, refpts=IP_indexes, coupled=False)
 beta_x = lindata['beta'][0,0]
@@ -71,6 +86,10 @@ nturns = 100
 rout_norad = np.zeros((nturns, 6))
 rout_rad = np.zeros((nturns, 6))
 
+#Here as you have clearly seen, the code is slow because lattice_pass goes to the C
+#tracking engine but then back and forth are done each turn to compute the bb kick
+#best option would be to write a C passmethod, if you are interested we can take a
+#look but this is low priority for now in my opinion
 # radiation off
 for i in range(nturns):
     rin_norad = np.squeeze(at.track.lattice_pass(ring_norad, rin, nturns=1))
