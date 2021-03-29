@@ -37,7 +37,6 @@ def kick_calc(x, y, Ee, sigx, sigy, Ne):
     re = 2.82e-15
 
     # Electron rest energy (eV)
-    # 0.000549 
     Eer = 0.511 * 1e6
 
     # Relativistic gamma factor
