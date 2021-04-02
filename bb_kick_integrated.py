@@ -21,8 +21,8 @@ def BassErsk(sigx,sigy,x,y):
         
     val = factBE*(wofz(zetaBE/S)-exp(-x*x/(2*sigx2)+y*y/(2*sigy2))*wofz(etaBE/S))
            
-    Ex=abs(val.imag)*sign(x)
-    Ey=abs(val.real)*sign(y)
+    Ex=val.imag
+    Ey=val.real
      
     return Ex, Ey
 
