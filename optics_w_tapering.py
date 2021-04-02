@@ -4,7 +4,6 @@ from at.physics import linopt, linopt_rad
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 import at.plot.specific
 
 path = './Lattices/'
@@ -14,18 +13,15 @@ latticef = path+filename
 ring = at.load.matfile.load_mat(latticef, mat_key=key)
 ring = at.Lattice(ring)
 
-xy_step = 1.0e-9
-dp_step = 1.0e-6
-
 # optics of the original lattice
 ring.radiation_off()
-l0, q, qp, l = linopt(ring,dp=0,refpts=range(len(ring)),get_chrom = True, coupled=False, XYStep=xy_step, DPStep=dp_step)
+l0, q, qp, l = linopt(ring,dp=0,refpts=range(len(ring)),get_chrom = True, coupled=False)
 
 # optics of tapered lattice
 ring.radiation_on(quadrupole_pass='auto')
 ring.set_cavity_phase()
-ring.tapering(niter = 2, quadrupole=True, sextupole=True, XYStep=xy_step, DPStep=dp_step)
-l0t,qt,qpt,lt = linopt_rad(ring, refpts=range(len(ring)), get_chrom=True, coupled=False, XYStep=xy_step, DPStep=dp_step)
+ring.tapering(niter = 2, quadrupole=True, sextupole=True)
+l0t,qt,qpt,lt = linopt_rad(ring, refpts=range(len(ring)), get_chrom=True, coupled=False)
 
 # s along the track
 spos = ring.get_s_pos(range(len(ring)))
@@ -51,7 +47,3 @@ plt.xlabel('s [m]')
 plt.ylabel(r'$D - D_0$')
 plt.legend(loc = 1, prop={'size': 8})
 plt.show()
-## ----------------------------------------------------------------------
-
-#input('Press ENTER to exit')
-
