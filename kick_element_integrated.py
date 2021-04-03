@@ -24,11 +24,11 @@ latticef = path+filename
 
 ring_norad = at.load.load_mat(latticef,key=key)
 ring_norad = at.Lattice(ring_norad)
-ring_tapered = copy.deepcopy(ring_norad)
+ring_tapered = ring_norad.deepcopy()
 
 # optics
 ring_tapered.radiation_on(quadrupole_pass='auto')
-ring_rad = copy.deepcopy(ring_tapered)
+ring_rad = ring_tapered.deepcopy()
 ring_tapered.tapering(niter = 2, quadrupole=True, sextupole=True)
 lindata0, tune, chrom, lindata = linopt_rad(ring_tapered,refpts=range(len(ring_tapered)),get_chrom=True,
                                coupled=False)
