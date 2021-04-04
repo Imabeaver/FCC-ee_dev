@@ -1,101 +1,66 @@
 # beam-beam kick for leptons in FCC-ee
 
-
-#you want to import only what is needed, especially matplotlib
-#is quite heavy
 import numpy as np
-from numpy import sqrt, pi, exp,sign
-from scipy import stats
-import sys
-from scipy.interpolate import interp1d
-from scipy.integrate import quad, dblquad
-import matplotlib.pyplot as plt
 from scipy.special import wofz
+from scipy.constants import physical_constants
+
+#particle properties, could be an input option
+_re, _, _ = physical_constants['classical electron radius']
+_me, _ ,_ = physical_constants['electron mass energy equivalent in MeV']
+_me *= 1e6
 
 # calculate the electric field along x and y
-def BassErsk(Csigx,Csigy,sepx,sepy):
-
-    #I would put all quantities in SI units, this will improve readability
-    
-    # Separations are moved from mm to meters
-    # why do you take the absolute value here?
-    x=abs(sepx/10**3);
-    y=abs(sepy/10**3);
-
-    # Calculating back in meter the sigmax and sigmay of paper CERN-ISR-TH/80-06
-    # why is this part needed, can't you use Csigx,y directly?
-    sigmax = np.sqrt((Csigx*(10**-6))**2)
-    sigmay = np.sqrt((Csigy*(10**-6))**2)
-
-
-    #I change the constant factor in front of the fields to have it in units of rp and gamma (K=2.*rp/gamma)
-    eps0= 1.  
-
-    # for optimization you may introduce variables that are the sigma^2 this would avoid having to recompute
-    # them mutiple times
-    S=sqrt(2*(sigmax*sigmax-sigmay*sigmay));
-    factBE=sqrt(pi)*2/(2*eps0*S);
-    etaBE=(sigmay/sigmax)*x+1j*(sigmax/sigmay)*y;
-    zetaBE=x+1j*y;
-     
-    #All functions here accept numpy array: to be used to avoid for loop   
-    val=factBE*(wofz(zetaBE/S)-exp(-x*x/(2*sigmax*sigmax)-y*y/(2*sigmay*sigmay))*wofz(etaBE/S));
-           
-    Ex=abs(val.imag)*sign(sepx);
-    Ey=abs(val.real)*sign(sepy);
-     
+def BassErsk(x,y,sigmax,sigmay):
+    sx2 = 2*sigmax*sigmax
+    sy2 = 2*sigmay*sigmay
+    S= np.sqrt(sx2-sy2)
+    factBE=np.sqrt(np.pi)/S
+    etaBE=(sigmay/sigmax)*x+1j*(sigmax/sigmay)*y
+    zetaBE=x+1j*y 
+    #ignore RunTime warning 
+    with np.errstate(invalid='ignore'):    
+        val=factBE*(wofz(zetaBE/S)-np.exp(-x*x/sx2-y*y/sy2)*wofz(etaBE/S))  
+    Ex=val.imag
+    Ey=val.real    
     return Ex, Ey
 
-# the beam-beam (BB) function, returns deflection angles and orbit deflections in x and y
-# this function can be simplified: tunes and beta are not needed
-def BB(Csigx,Csigy,sepx,sepy,betax,betay,tunex,tuney,Ne,Ee):
+# convert the electric field into deflection angles
+def kick_calc(x,y,sigma_x,sigma_y,Ee,Ne,sigma_s,theta_x,theta_y):
+    gamma=Ee/_me
+    K = -2*_re*Ne/gamma
+    sx = np.sqrt(1+(sigma_s/sigma_x*np.tan(theta_x/2))**2)
+    sy = np.sqrt(1+(sigma_s/sigma_y*np.tan(theta_y/2))**2)
+    dx,dy = BassErsk(x,y,sigma_x*sx,sigma_y*sy)
+    return dx*K, dy*K
 
-    # Electron mass in atomic units u
-    A=0.000549
+#compute head-on linear beam-beam parameters
+def bb_param(Ne, E0,beta_x,beta_y,sigma_x,sigma_y,sigma_s,theta_x,theta_y):
+    sx = np.sqrt(1+(sigma_s/sigma_x*np.tan(theta_x/2))**2)
+    sy = np.sqrt(1+(sigma_s/sigma_y*np.tan(theta_y/2))**2)
+    bbparamx = Ne*_re*_me*beta_x/(E0*2*np.pi*sigma_x*sx*(sigma_x*sx+sigma_y*sy))
+    bbparamy = Ne*_re*_me*beta_y/(E0*2*np.pi*sigma_y*sy*(sigma_x*sx+sigma_y*sy))
+    return bbparamx,bbparamy,sx,sy
 
-    # Electron classical radius (m)
-    re=2.82e-15
+#apply the kick to a particle array without integration in the lattice
+def apply_kick(rin,sigx,sigy,E0,Ne,sigma_s,theta_x,theta_y):
+    dx,dy = kick_calc(rin[0],rin[2],sigx,sigy,E0,Ne,sigma_s,theta_x,theta_y)
+    #conversion from x' to px/p0
+    rin[1] +=  dx*(1+rin[4])
+    rin[3] +=  dy*(1+rin[4])
 
-    # Electron rest energy (eV)
-    # A is not need in this calculation, it may explain the negligible tune shift you observe
-    Eer=A*0.511 * 1e6
+#apply the kick to a particle with pyElement integrated in the lattice
+#Warning AT passmethods take vectors as input, not 2D arrays
+def passmethod(rin,elem=None):
+    sigx, sigy, sigma_s = elem.sigma
+    theta_x, theta_y = elem.theta
+    E0 = elem.E0
+    Ne = elem.Ne
+    dx,dy = kick_calc(rin[0::6],rin[2::6],sigx,sigy,E0,Ne,sigma_s,theta_x,theta_y)
+    #conversion from x' to px/p0
+    rin[1::6] +=  dx*(1+rin[4::6])
+    rin[3::6] +=  dy*(1+rin[4::6])
+    return rin
 
-    # relativistic gamma factor 
-    gamma=Ee/Eer
 
-    K = 2*re/gamma
-
-    Ex,Ey = BassErsk(Csigx,Csigy,sepx,sepy)
-
-    Dfleix = -K*Ne*Ex # delta_x
-    Dfleiy = -K*Ne*Ey # delta_y 
-
-    #this part is not needed, AT will return the orbit, you may want to remove it to
-    #avoid unused computations 
-    Orbx = Dfleix*betax*(1./(2.*np.tan(pi*tunex))) # change in x due to BB, called orbit x
-    Orby = Dfleiy*betay*(1./(2.*np.tan(pi*tuney))) # chanfe in y due to BB
-
-    #again this conversion can become confusing for large codes
-    return Dfleix*10**6,Dfleiy*10**6,Orbx*10**6,Orby*10**6
-
-def kick_calc(x,y,Ee, sigx, sigy, betax, betay, tunex, tuney, Ne):
-    # x, y must be a single value! If given as array the code doesn't perform as it should.
-    #why it doesn't work? It should be able to handle numpy array from what I have seen
-    #using arrays instead of for loops will improve speed
-    #all your variables should numpy arrays for this to work
-    
-    #power is slow, privilege mutliplication in this case
-    #why is this done? Can't you use sigx,y directly?
-    Csigx = np.sqrt(np.power(sigx,2))
-    Csigy = np.sqrt(np.power(sigy,2))
-    
-    sepx = x * 1e3 # mm
-    sepy = y * 1e3 # mm
-		
-    Dfleix,Dfleiy,Orbx,Orby = BB(Csigx,Csigy,sepx,sepy,betax,betay,tunex,tuney,Ne,Ee)
-
-    return Dfleix, Dfleiy, x*1e6/sigx
-
-# end
 
 
