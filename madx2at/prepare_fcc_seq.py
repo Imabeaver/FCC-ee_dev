@@ -76,5 +76,5 @@ if __name__ == "__main__":
     #fname = '../fcc_lattice/Optics_FCCee_w_217_nosol_1.seq'
     fname = '../fcc_lattice/Optics_FCCee_z_217_nosol_20.seq'
     reformat_seq(fname,nskip = 5)
-    save_seq(fname,fmask='./save_seq.mask',mexec='/machfs/swhite/madx/madx')
+    save_seq(fname,fmask='./save_seq.mask',mexec='./madx')
     
