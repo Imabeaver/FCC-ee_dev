@@ -1,0 +1,7 @@
+Option,-echo,-info;
+set,format="40.30g";
+Beam, particle = electron, pc=120;
+call,  file = '../fcc_lattice/Optics_FCCee_z_217_nosol_20_py.seq';
+use, sequence = L000013;
+save,file = '../fcc_lattice/Optics_FCCee_z_217_nosol_20_for_at.seq';
+stop;
