@@ -96,7 +96,8 @@ x = np.linspace(mina,maxa, npart)*sigma_x*sx
 rin = np.zeros((6,npart))
 rin[0,:]=x
 t0 = time.time()
-rout_bb = np.squeeze(lattice_pass(ring_bb, rin, nturns=nturns, keep_lattice=True))
+#keep_lattice = False required to properly initialize the lattice
+rout_bb = np.squeeze(lattice_pass(ring_bb, rin, nturns=nturns, keep_lattice=False))
 print('Tracking with bb took: ',time.time()-t0)
 
 #track without beam-beam
@@ -104,7 +105,8 @@ x = np.linspace(mina,maxa, npart)*sigma_x*sx
 rin = np.zeros((6,npart))
 rin[0,:]=x
 t0 = time.time()
-rout_nobb = np.squeeze(lattice_pass(ring_norad, rin, nturns=nturns, keep_lattice=True))
+#keep_lattice = False required to properly initialize the lattice
+rout_nobb = np.squeeze(lattice_pass(ring_norad, rin, nturns=nturns, keep_lattice=False))
 print('Tracking without bb took: ',time.time()-t0)
 
 # phase space plotting
