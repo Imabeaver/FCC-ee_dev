@@ -38,4 +38,4 @@ export_ref = {'EL. NUMBER': no, 'S': spos.T, 'BETX_PYAT': l.beta[:,0].T, 'BETY_P
 df0 = pd.DataFrame(export_tap, columns=['EL. NUMBER','S','BETX_PYAT','BETY_PYAT','DX_PYAT','DY_PYAT'])
 df0.to_csv(path + lattice + '/data_tapered_pyat.csv', index = False, header = True)
 df1 = pd.DataFrame(export_ref, columns=['EL. NUMBER','S','BETX_PYAT','BETY_PYAT','DX_PYAT','DY_PYAT'])
-df0.to_csv(path + lattice + '/data_reference_pyat.csv', index = False, header = True)
+df1.to_csv(path + lattice + '/data_reference_pyat.csv', index = False, header = True)
