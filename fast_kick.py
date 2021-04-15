@@ -24,7 +24,8 @@ E0 = ring_norad.energy
 print('Nominal energy:', E0, 'eV')
 
 ring_rad.radiation_on(quadrupole_pass='auto')
-ring_rad.set_cavity_phase()
+if E0 > 120e9:
+    ring_rad.set_cavity_phase()
 
 ring_rad.tapering(niter = 2, XYStep=xy_step, DPStep=dp_step)
 
