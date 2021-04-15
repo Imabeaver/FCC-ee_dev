@@ -1,6 +1,6 @@
 clear
 %% FCC lattice
-fcc = 'z';
+fcc = 't';
 if fcc=='h'
     fname = '../fcc_lattice/Optics_FCCee_h_217_nosol_3.seq';
     seqfilemadX='../fcc_lattice/Optics_FCCee_h_217_nosol_3_for_at.seq';
@@ -11,7 +11,7 @@ if fcc=='t'
     fname = '../fcc_lattice/Optics_FCCee_t_217_nosol_3.seq';
     seqfilemadX='../fcc_lattice/Optics_FCCee_t_217_nosol_3_for_at.seq';
     seqname = 'L000013';
-    E0=175e9;
+    E0=182.5e9;
 end
 if fcc=='w'
     fname = '../fcc_lattice/Optics_FCCee_w_217_nosol_1.seq';

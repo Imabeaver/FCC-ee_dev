@@ -5,7 +5,7 @@ import  bb_kick_integrated as bb
 import matplotlib.pyplot as plt
 from at.tracking import element_pass, lattice_pass
 from at.physics import linopt, fast_ring
-from at.lattice import DConstant
+from at.lattice import DConstant, get_refpts, RFCavity, Dipole
 from at.lattice import PyElement
 import time
 
@@ -13,19 +13,20 @@ import time
 xy_step = 1.0e-9
 dp_step = 1.0e-6
 
-ring = at.load_lattice('./Lattices/fcch_norad.mat', mat_key='ring')
+ring = at.load_lattice('./fcc_lattice/fcct_norad.mat', mat_key='ring')
 
 #init rings - deepcopy() required to remove all shared references
 ring_norad = ring.deepcopy()
 ring_norad.radiation_off(copy=True)
-
 ring_rad = ring.deepcopy()
-ring_rad.radiation_on(quadrupole_pass='auto')
-ring_rad.set_cavity_phase(method='tracking')
-ring_rad.tapering(niter = 2, quadrupole=True, sextupole=True, XYStep=xy_step, DPStep=dp_step)
 
 E0 = ring_norad.energy
 print('Nominal energy:', E0, 'eV')
+
+ring_rad.radiation_on(quadrupole_pass='auto')
+ring_rad.set_cavity_phase()
+
+ring_rad.tapering(niter = 2, XYStep=xy_step, DPStep=dp_step)
 
 # emittance
 env = ring_rad.envelope_parameters()
@@ -33,15 +34,26 @@ epsilon_x = env.emittances[0]
 epsilon_y = env.emittances[1]
 sigma_s = env.sigma_l
 
-
 if (E0 == 120*1e9) is True:
     epsilon_y = 1.3*1e-12 # ZH
+    Ne = 1.8*1e11 # H(ZH)
+    sigma_s = 5.3e-3 #with BS
 elif (E0 == 45.6*1e9) is True:
     epsilon_y = 1.0*1e-12 # Z
+    Ne = 1.7*1e11 # Z
+    sigma_s = 12.1e-3 #with BS
+elif (E0 == 175*1e9) is True:
+    epsilon_y = 2.7*1e-12 # TT
+    Ne = 2.2*1e11 # TT
+    sigma_s = 3.82e-3 #with BS
 elif (E0 == 182.5*1e9) is True:
     epsilon_y = 2.9*1e-12 # TT
+    Ne = 2.3*1e11 # TT
+    sigma_s = 2.54e-3 #with BS
 elif (E0 == 80*1e9) is True:
     epsilon_y = 1.7*1e-12 # WW
+    Ne = 1.5*1e11 # H(ZH)
+    sigma_s = 6.0e-3 #with BS
     
 print('Emittance_x:',epsilon_x,'\n','Emittance_y', epsilon_y)
 
@@ -52,20 +64,12 @@ print('Beta_x:', beta_x,'\n','Beta_y:',beta_y)
 # beam size
 sigma_x = np.sqrt(epsilon_x* beta_x)
 sigma_y = np.sqrt(epsilon_y*beta_y)
-print('Sigma_x:', sigma_x, '\n', 'Sigma_y:', sigma_y, '\n', 'Sigma_s:', sigma_s)
-
-# number of e- per bunch (bunch population)
-if (E0 == 120*1e9) or (E0 == 80*1e9) is True:
-        Ne = 1.8*1e11 # H(ZH)
-elif (E0 == 45.6*1e9) is True:
-        Ne = 1.7*1e11 # Z
-elif (E0 == 182.5*1e9) is True:
-        Ne = 2.3*1e11 # TT
+print('Sigma_x:', sigma_x, '\n', 'Sigma_y:', sigma_y, '\n', 'Sigma_s (with BS):', env.sigma_l, sigma_s)
+      
 
 #values found online: Boscolo talk
 theta_x = 30e-3
 theta_y = 0.0
-sigma_s = 5.3e-3 #with BS
 bbparamx, bbparamy,sx,sy = bb.bb_param(Ne, E0, beta_x, beta_y, sigma_x, sigma_y, sigma_s, theta_x, theta_y)
 print('theta_x:', theta_x, '\n', 'theta_y:', theta_y)
 print('zeta_x:', bbparamx, '\n', 'zeta_y:', bbparamy)

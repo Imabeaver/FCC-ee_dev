@@ -3,7 +3,7 @@ import re
 import os
 
 
-def save_seq(fname,fmask='./save_seq.mask',mexec='/machfs/swhite/madx/madx'):
+def save_seq(fname,fmask='./save_seq.mask',mexec='./madx'):
     #save a madx sequence
     fin = fname.replace('.seq','_py.seq')
     fout = fname.replace('.seq','_for_at.seq')
@@ -39,7 +39,7 @@ def reformat_seq(fname,nskip = 5):
     n=nskip
     dvars={}
     line=lines[n]
-    while line !='\n':
+    while line !='\r\n' and line !='\n':
         fhandle.write(lines[n]) 
         sl = line.split('=')
         dvars[sl[0]]=sl[1]
@@ -49,7 +49,7 @@ def reformat_seq(fname,nskip = 5):
     n=n+1
     delems={}
     line=lines[n]
-    while line !='\n': 
+    while line !='\r\n' and line !='\n': 
         sl = line.replace(';','').replace('\n','').split(' : ')
         delems[sl[0]]=sl[1]
         n=n+1
@@ -75,6 +75,6 @@ if __name__ == "__main__":
     #fname = '../fcc_lattice/Optics_FCCee_h_217_nosol_3.seq'
     #fname = '../fcc_lattice/Optics_FCCee_w_217_nosol_1.seq'
     fname = '../fcc_lattice/Optics_FCCee_z_217_nosol_20.seq'
-    reformat_seq(fname,nskip = 5)
-    save_seq(fname,fmask='./save_seq.mask',mexec='./madx')
+    reformat_seq(fname)
+    save_seq(fname)
     

@@ -3,6 +3,7 @@ function gen_lat_fun(fname)
 global NUMDIFPARAMS
 NUMDIFPARAMS.XYStep = 1e-9;
 NUMDIFPARAMS.DPStep = 1e-9;
+clight = 2.99792458e8;
 
 v = load(strcat(fname,'.mat'));
 ring = v.ring;
@@ -25,16 +26,20 @@ ring(sext) = atsetfieldvalues(ring(sext),'NumIntSteps',20);
 ring(dip) = atsetfieldvalues(ring(dip),'EntranceAngle',0);
 ring(dip) = atsetfieldvalues(ring(dip),'ExitAngle',0);
 
-volt = sum(atgetfieldvalues(ring(cav),'Voltage'));
-freq = mean(atgetfieldvalues(ring(cav),'Frequency'));
+%volt = sum(atgetfieldvalues(ring(cav),'Voltage'));
+freq = atgetfieldvalues(ring(cav),'Frequency');
+[fc,~,ib] = unique(freq);
 len = findspos(ring,length(ring)+1);
-harm = floor(freq/2.99792e8*len);
+harm = floor(fc/clight*len);
+for i = 1: length(cav)
+    ring{cav(i)}.HarmNumber = harm(ib(i));
+    ring{cav(i)}.Frequency = ring{cav(i)}.HarmNumber/len*clight;
+end
 
 idpass = findcells(ring,'PassMethod','IdentityPass');
 ring(idpass) = atsetfieldvalues(ring(idpass),'Length',0);
 
 %ring w.o. radiations
-ring = atsetcavity(ring,volt,0,harm);
 ring = atradoff(ring,'IdentityPass','auto','auto');
 eval(['save ',fname,'_norad.mat ring']);
 end
