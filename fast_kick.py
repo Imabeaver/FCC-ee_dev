@@ -13,7 +13,7 @@ import time
 xy_step = 1.0e-9
 dp_step = 1.0e-6
 
-ring = at.load_lattice('./fcc_lattice/fcct_norad.mat', mat_key='ring')
+ring = at.load_lattice('./fcc_lattice/fcch_norad.mat', mat_key='ring')
 
 #init rings - deepcopy() required to remove all shared references
 ring_norad = ring.deepcopy()
@@ -24,8 +24,7 @@ E0 = ring_norad.energy
 print('Nominal energy:', E0, 'eV')
 
 ring_rad.radiation_on(quadrupole_pass='auto')
-if E0 > 120e9:
-    ring_rad.set_cavity_phase()
+ring_rad.set_cavity_phase()
 
 ring_rad.tapering(niter = 2, XYStep=xy_step, DPStep=dp_step)
 
